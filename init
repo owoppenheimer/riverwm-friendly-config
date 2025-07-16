@@ -1,0 +1,212 @@
+#!/bin/sh
+
+# This is a default config of river improved by owoppenheimer. See github.com/owoppenheimer
+# Default config path: /usr/share/river/example/init
+
+# RiverWM Shell Config, V1.0
+# I advise you to study shell syntax, because it's written on /bin/sh
+# You can rewrite it on fish, zsh, lua, python, etc. See https://codeberg.org/river/wiki#wait-the-configuration-is-a-shell-script
+
+# Declare all things that you need here
+# Aliases is commonly needed for executing commands from config, because river doesn't support on-the-fly config reload
+# See https://codeberg.org/river/wiki#how-do-i-reload-the-configuration-file
+
+# Don't touch that
+ctl="$ctl"
+bindsym="riverctl map normal"
+
+# Change 'alacritty' to your preferred terminal emulator
+term="alacritty"
+wofi="wofi --show drun"
+# Change it to your preferred screenshot tool
+screenshooter='grim -g "$(slurp)" - | wl-copy'
+
+#############################################
+##                                         ##
+##                   ENVS                  ##
+##                                         ##
+#############################################
+
+# How do i set envs?
+# - Just export them via 'export' in your shell config.
+# - Because this file uses /bin/sh session that closes after executing.
+#
+# CAUTION: to make xdg-desktop-portal work, you'll need to set XDG_CURRENT_DESKTOP=river and uncomment # Portal fix in the 'autostart'
+
+###########################################
+##                                       ##
+##                AUTOSTART              ##
+##                                       ##
+###########################################
+
+# Use 'exec' to execute a program at startup.
+# Don't forget to use ampersand(&) to not break further commands
+
+# Portal fix
+# exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP &
+# exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river &
+
+# Set the wallpaper (using swaybg, but you can use swww or hyprpaper)
+# Example:
+
+# exec swaybg --mode fill -i ~/walls/1.png &
+# exec waybar &
+
+######################################################
+##                                                  ##
+##                BASE CONFIGURATION                ##
+##                                                  ##
+######################################################
+
+# Set up your monitor (you have to install wlr-randr first)
+# Check yout monitor with "wlr-randr"
+# Example:
+# wlr-randr --output HDMI-A-1 --mode 1920x1080@74.973
+
+# XKB options
+# Example:
+# $ctl keyboard-layout "us,ru"
+# $ctl keyboard-layout -options "grp:caps_toggle" "us,ru"
+
+# Super+Space to toggle float
+$bindsym Super+Shift Tab toggle-float
+
+# Super+F to toggle fullscreen
+$bindsym Super F toggle-fullscreen
+
+# Set background and border color
+$ctl background-color 0x002b36
+$ctl border-color-focused 0x93a1a1
+$ctl border-color-unfocused 0x364548
+
+# Set keyboard repeat rate
+$ctl set-repeat 30 470
+
+$ctl rule-add -app-id 'float*' -title 'foo' float
+$ctl rule-add -app-id "bar" csd
+
+$ctl default-layout rivertile
+rivertile -view-padding 6 -outer-padding 6 &
+
+# Set your cursor theme. Cursor themes are usually located in ~/.icons /usr/share/icons ~/.local/share/icons
+# Example: (neurosama btw)
+
+# $ctl xcursor-theme neurosama
+
+################################################
+##                                            ##
+##                   BINDS                    ##
+##                                            ##
+################################################
+
+$bindsym Super Q close
+$bindsym Super Cyrillic_SHORTI close
+$bindsym Super D spawn "$wofi"
+$bindsym Super Cyrillic_VE spawn "$wofi"
+$bindsym Print spawn "$screenshooter"
+
+$bindsym Super Return spawn "$term"
+$bindsym Super+Shift E exit
+
+$bindsym Super Left focus-view next
+$bindsym Super Right focus-view previous
+
+$bindsym Super+Shift Down swap next
+$bindsym Super+Shift Up swap previous
+
+$bindsym Super Period focus-output next
+$bindsym Super Comma focus-output previous
+
+$bindsym Super+Shift Period send-to-output next
+$bindsym Super+Shift Comma send-to-output previous
+$bindsym Super+Shift Return zoom
+
+$bindsym Super+Shift Left send-layout-cmd rivertile "main-ratio -0.05"
+$bindsym Super+Shift Right send-layout-cmd rivertile "main-ratio +0.05"
+$bindsym Super+Shift O send-layout-cmd rivertile "main-count +1"
+$bindsym Super+Shift P send-layout-cmd rivertile "main-count -1"
+
+$bindsym Super+Alt H move left 100
+$bindsym Super+Alt J move down 100
+$bindsym Super+Alt K move up 100
+$bindsym Super+Alt L move right 100
+
+$bindsym Super+Alt+Control H snap left
+$bindsym Super+Alt+Control J snap down
+$bindsym Super+Alt+Control K snap up
+$bindsym Super+Alt+Control L snap right
+
+$bindsym Super+Alt+Shift H resize horizontal -100
+$bindsym Super+Alt+Shift J resize vertical 100
+$bindsym Super+Alt+Shift K resize vertical -100
+$bindsym Super+Alt+Shift L resize horizontal 100
+
+$ctl map-pointer normal Super BTN_LEFT move-view
+$ctl map-pointer normal Super BTN_RIGHT resize-view
+
+$ctl map-pointer normal Super BTN_MIDDLE toggle-float
+
+###############################################
+##                                           ##
+##                   RULES                   ##
+##                                           ##
+###############################################
+
+# See the Rules section of $ctl(1) man page to learn more about how rule-add works.
+# You can get the app-id of an application using a client like lswt. - https://codeberg.org/river/wiki#some-windows-don-t-have-borders
+# Example:
+
+# $ctl rule-add -app-id firefox ssd
+# $ctl rule-add -app-id AmneziaVPN float
+
+###################################################
+##                                               ##
+##                   TAG SETTINGS                ##
+##                                               ##
+###################################################
+
+for i in $(seq 1 9); do
+    tags=$((1 << ($i - 1)))
+
+    $bindsym Super $i set-focused-tags $tags
+    $bindsym Super+Shift $i set-view-tags $tags
+    $bindsym Super+Control $i toggle-focused-tags $tags
+    $bindsym Super+Shift+Control $i toggle-view-tags $tags
+done
+
+# Super+0 to focus all tags
+# Super+Shift+0 to tag focused view with all tags
+all_tags=$(((1 << 32) - 1))
+$bindsym Super 0 set-focused-tags $all_tags
+$bindsym Super+Shift 0 set-view-tags $all_tags
+
+# The scratchpad will live on an unused tag. Which tags are used depends on your
+# config, but rivers default uses the first 9 tags.
+scratch_tag=$((1 << 20 ))
+
+# Toggle the scratchpad with Super+P
+$bindsym Super Minus toggle-focused-tags ${scratch_tag}
+$bindsym Super+Shift Minus set-view-tags ${scratch_tag}
+# Set spawn tagmask to ensure new windows don't have the scratchpad tag unless
+# explicitly set.
+all_but_scratch_tag=$(( ((1 << 32) - 1) ^ $scratch_tag ))
+$ctl spawn-tagmask ${all_but_scratch_tag}
+
+
+#############################################
+##                                         ##
+##                   OTHER                 ##
+##                                         ##
+#############################################
+
+# Pamixer binds (works like a volume keybindings on Windows)
+for mode in normal locked; do
+    $ctl map $mode None XF86AudioRaiseVolume  spawn 'pamixer -i 5'
+    $ctl map $mode None XF86AudioLowerVolume  spawn 'pamixer -d 5'
+    $ctl map $mode None XF86AudioMute         spawn 'pamixer --toggle-mute'
+done
+
+# Passthrough mode settings
+$ctl declare-mode passthrough
+$bindsym Super F11 enter-mode passthrough
+$ctl map passthrough Super F11 enter-mode normal
