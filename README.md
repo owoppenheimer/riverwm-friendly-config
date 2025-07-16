@@ -1,5 +1,4 @@
 # riverwm-friendly-config
--------------------------
 
 ### What is it?
 
