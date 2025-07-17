@@ -100,10 +100,8 @@ rivertile -view-padding 6 -outer-padding 6 &
 ################################################
 
 $bindsym Super Q close
-$bindsym Super Cyrillic_SHORTI close
 $bindsym Super D spawn "$wofi"
-$bindsym Super Cyrillic_VE spawn "$wofi"
-$bindsym Print spawn "$screenshooter"
+$bindsym None Print spawn "$screenshooter"
 
 $bindsym Super Return spawn "$term"
 $bindsym Super+Shift E exit
