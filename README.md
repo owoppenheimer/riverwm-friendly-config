@@ -11,7 +11,7 @@ It provides:
 - Variables for more convenient use
 - And more...
 
-It is based on default shell riverwm config, which locates in /usr/share/river/example/init
+It is based on default shell riverwm config, which locates at /usr/share/river/example/init
 
 ---------
 
